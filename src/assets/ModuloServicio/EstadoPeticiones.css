@@ -1,0 +1,61 @@
+/* Contenedor principal */
+.estado-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #003f7f, #007bff); /* Fondo degradado */
+  color: white;
+  min-height: 100vh;
+}
+
+/* Título */
+.estado-container h1 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #ffbf00; /* Amarillo */
+}
+
+/* Contenedor de peticiones */
+.estado-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Tarjeta de petición */
+.estado-card {
+  background: white;
+  color: #333;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Título del servicio */
+.estado-card h3 {
+  color: #0056b3;
+  margin: 0 0 10px;
+}
+
+/* Botón de cancelar */
+.cancel-button {
+  background: #dc3545; /* Rojo */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cancel-button:hover {
+  background: #b02a37;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
