@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import appFirebase from "../../credenciales";
 import Imagen from "../images/logo.png"; // Cambia el logo según tu estructura
 
 const auth = getAuth(appFirebase);
+const db = getFirestore(appFirebase);
 
 const RegisterScreen = () => {
   const navigate = useNavigate();
@@ -16,13 +18,27 @@ const RegisterScreen = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setErrorMessage(""); // Limpiar mensajes de error anteriores
+    setErrorMessage("");
 
     try {
-      await createUserWithEmailAndPassword(auth, email.trim(), password.trim());
-      console.log("Usuario registrado con éxito");
-      navigate("/home"); // Redirigir a la pantalla de inicio
+      // Crear el usuario en Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password.trim()
+      );
+
+      // Guardar datos del usuario en Firestore
+      await setDoc(doc(db, "Usuario", userCredential.user.uid), {
+        email: email.trim(),
+        contraseña: password.trim(),
+        nombre: name.trim(),
+      });
+
+      // Redirigir al inicio de sesión
+      navigate("/");
     } catch (error) {
+      console.error("Error al registrar:", error);
       if (error.code === "auth/email-already-in-use") {
         setErrorMessage("El correo ya está en uso.");
       } else if (error.code === "auth/weak-password") {
@@ -68,35 +84,28 @@ const RegisterScreen = () => {
           }}
         />
         {/* Título */}
-        <h1 style={{ color: "#04294F", fontSize: "28px", fontWeight: "bold", marginBottom: "20px" }}>
+        <h1
+          style={{
+            color: "#04294F",
+            fontSize: "28px",
+            fontWeight: "bold",
+            marginBottom: "20px",
+          }}
+        >
           REGÍSTRATE
         </h1>
 
         <form onSubmit={handleRegister}>
-          {/* Campo de Email */}
+          {/* Campo de Nombre */}
           <div style={{ marginBottom: "15px", textAlign: "left" }}>
-            <label style={{ color: "#04294F", fontWeight: "bold", marginBottom: "5px", display: "block" }}>
-              Dirección electrónica
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="yourname@gmail.com"
+            <label
               style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "5px",
-                border: "1px solid #ddd",
-                color: "#333",
-                outline: "none",
+                color: "#04294F",
+                fontWeight: "bold",
+                marginBottom: "5px",
+                display: "block",
               }}
-            />
-          </div>
-
-          {/* Campo de Usuario */}
-          <div style={{ marginBottom: "15px", textAlign: "left" }}>
-            <label style={{ color: "#04294F", fontWeight: "bold", marginBottom: "5px", display: "block" }}>
+            >
               Tu Usuario
             </label>
             <input
@@ -115,9 +124,44 @@ const RegisterScreen = () => {
             />
           </div>
 
+          {/* Campo de Email */}
+          <div style={{ marginBottom: "15px", textAlign: "left" }}>
+            <label
+              style={{
+                color: "#04294F",
+                fontWeight: "bold",
+                marginBottom: "5px",
+                display: "block",
+              }}
+            >
+              Dirección electrónica
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="yourname@gmail.com"
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "5px",
+                border: "1px solid #ddd",
+                color: "#333",
+                outline: "none",
+              }}
+            />
+          </div>
+
           {/* Campo de Contraseña */}
           <div style={{ marginBottom: "15px", textAlign: "left", position: "relative" }}>
-            <label style={{ color: "#04294F", fontWeight: "bold", marginBottom: "5px", display: "block" }}>
+            <label
+              style={{
+                color: "#04294F",
+                fontWeight: "bold",
+                marginBottom: "5px",
+                display: "block",
+              }}
+            >
               Contraseña
             </label>
             <input
@@ -155,7 +199,16 @@ const RegisterScreen = () => {
 
           {/* Mostrar errores */}
           {errorMessage && (
-            <p style={{ color: "red", fontSize: "14px", textAlign: "center", marginBottom: "15px" }}>{errorMessage}</p>
+            <p
+              style={{
+                color: "red",
+                fontSize: "14px",
+                textAlign: "center",
+                marginBottom: "15px",
+              }}
+            >
+              {errorMessage}
+            </p>
           )}
 
           {/* Botón de registro */}
@@ -182,7 +235,7 @@ const RegisterScreen = () => {
           ¿Ya tienes cuenta?{" "}
           <button
             type="button"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/")}
             style={{
               background: "none",
               border: "none",
