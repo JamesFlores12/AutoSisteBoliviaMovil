@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../../credenciales"; // Asegúrate de que la conexión esté correcta
+import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+import { db } from "../../credenciales"; // Conexión a Firebase
+import { useNavigate } from "react-router-dom";
 import "./PagoServicio.css";
 
 const PagoServicio = () => {
-  const [peticionEnProceso, setPeticionEnProceso] = useState(null); // Petición en proceso
-  const [loading, setLoading] = useState(true); // Estado de carga
+  const [peticionEnProceso, setPeticionEnProceso] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [tarjeta, setTarjeta] = useState({
+    numero: "",
+    fechaExpiracion: "",
+    tipo: "",
+  });
+  const navigate = useNavigate();
 
-  const usuarioAutenticado = "usuarioEjemplo@gmail.com"; // Usuario autenticado
+  const usuarioAutenticado = "usuarioEjemplo@gmail.com";
 
   useEffect(() => {
     const fetchPeticionEnProceso = async () => {
@@ -25,11 +32,11 @@ const PagoServicio = () => {
           const peticion = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          }))[0]; // Obtener la primera petición en progreso
+          }))[0];
 
           setPeticionEnProceso(peticion);
         } else {
-          setPeticionEnProceso(null); // No hay datos
+          setPeticionEnProceso(null);
         }
       } catch (error) {
         console.error("Error al obtener la petición en progreso:", error);
@@ -40,6 +47,54 @@ const PagoServicio = () => {
 
     fetchPeticionEnProceso();
   }, [usuarioAutenticado]);
+
+  const handleConfirmarPago = async () => {
+    if (!peticionEnProceso) return;
+
+    try {
+      const pagoData = {
+        fecha: new Date().toLocaleString(),
+        idSolicitud: peticionEnProceso.id,
+        monto: peticionEnProceso.precio,
+        proveedor: peticionEnProceso.proveedor,
+        usuario: usuarioAutenticado,
+      };
+
+      const metodoPagoData = {
+        Numero_tarjeta: tarjeta.numero,
+        Fecha_expiracion: tarjeta.fechaExpiracion,
+        Tipo_Tarjeta: tarjeta.tipo,
+      };
+
+      await addDoc(collection(db, "Pago"), pagoData);
+      await addDoc(collection(db, "Metodo_Pago"), metodoPagoData);
+
+      alert("¡Pago confirmado con éxito!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error al confirmar el pago:", error);
+      alert("Hubo un error al realizar el pago.");
+    }
+  };
+
+  const handleNumeroTarjeta = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // Permitir solo números
+    const formatted = value.replace(/(\d{4})(?=\d)/g, "$1 "); // Formato de 4 dígitos separados por espacios
+    setTarjeta({ ...tarjeta, numero: formatted });
+  };
+
+  const handleFechaExpiracion = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // Permitir solo números
+    const formatted = value
+      .replace(/(\d{2})(\d{1,2})/, "$1/$2") // Formato MM/AA
+      .slice(0, 5); // Limitar a 5 caracteres
+    setTarjeta({ ...tarjeta, fechaExpiracion: formatted });
+  };
+
+  const isFormularioValido =
+    tarjeta.numero.replace(/\s/g, "").length === 16 &&
+    tarjeta.fechaExpiracion.length === 5 &&
+    tarjeta.tipo !== "";
 
   if (loading) {
     return (
@@ -75,9 +130,38 @@ const PagoServicio = () => {
         <p>
           <strong>Total a pagar:</strong> Bs{precio}
         </p>
+
+        <h3>Información de la Tarjeta</h3>
+        <form className="payment-form">
+          <input
+            type="text"
+            placeholder="Número de tarjeta (16 dígitos)"
+            maxLength={19}
+            value={tarjeta.numero}
+            onChange={handleNumeroTarjeta}
+          />
+          <input
+            type="text"
+            placeholder="Fecha de vencimiento (MM/AA)"
+            maxLength={5}
+            value={tarjeta.fechaExpiracion}
+            onChange={handleFechaExpiracion}
+          />
+          <select
+            value={tarjeta.tipo}
+            onChange={(e) => setTarjeta({ ...tarjeta, tipo: e.target.value })}
+          >
+            <option value="">Selecciona el tipo de tarjeta</option>
+            <option value="Débito">Tarjeta de Débito</option>
+            <option value="Crédito">Tarjeta de Crédito</option>
+          </select>
+        </form>
         <button
-          className="confirm-payment-button"
-          onClick={() => alert("¡Pago confirmado con éxito!")}
+          className={`confirm-payment-button ${
+            !isFormularioValido ? "disabled" : ""
+          }`}
+          onClick={handleConfirmarPago}
+          disabled={!isFormularioValido}
         >
           Confirmar Pago
         </button>
