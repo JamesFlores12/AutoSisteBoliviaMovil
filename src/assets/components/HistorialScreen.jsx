@@ -6,7 +6,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { onAuthStateChanged, getAuth } from "firebase/auth";
 import appFirebase from "../../credenciales";
 import { FaHome, FaTools, FaReceipt, FaUser } from "react-icons/fa";
 
@@ -14,50 +14,67 @@ const db = getFirestore(appFirebase);
 const auth = getAuth(appFirebase);
 
 const HistorialScreen = () => {
-  const [peticiones, setPeticiones] = useState([]);
-  const [filter, setFilter] = useState("All"); // Filtro para "All", "Pendiente", etc.
-  const [loading, setLoading] = useState(true);
-  const [selectedIndex, setSelectedIndex] = useState(2); // Selecciona "Historial" por defecto.
+  const [peticiones, setPeticiones] = useState([]); // Lista de peticiones
+  const [filter, setFilter] = useState("All"); // Filtro para estados ("All", "Pendiente", etc.)
+  const [loading, setLoading] = useState(true); // Estado de carga
+  const [userEmail, setUserEmail] = useState(null); // Correo del usuario autenticado
+  const [selectedIndex, setSelectedIndex] = useState(2); // Historial seleccionado por defecto
 
-  // Obtener usuario autenticado
-  const user = auth.currentUser;
-
+  // Obtener el usuario autenticado
   useEffect(() => {
-    if (user) {
-      fetchPeticiones(user.email);
-    }
-  }, [user]);
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email); // Establece el correo del usuario autenticado
+      } else {
+        console.error("No hay usuario autenticado.");
+      }
+    });
 
-  // Consultar peticiones en Firestore
-  const fetchPeticiones = async (userEmail) => {
-    setLoading(true);
-    const peticionRef = collection(db, "Peticion");
-    const q = query(peticionRef, where("usuario", "==", userEmail));
-    const querySnapshot = await getDocs(q);
+    return () => unsubscribeAuth(); // Limpiar la suscripción
+  }, []);
 
-    const data = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setPeticiones(data);
-    setLoading(false);
-  };
+  // Cargar las peticiones desde Firestore
+  useEffect(() => {
+    const fetchPeticiones = async () => {
+      if (!userEmail) return; // Espera hasta tener el correo del usuario
 
-  // Filtrar peticiones por estado
+      setLoading(true);
+      try {
+        const peticionRef = collection(db, "Peticion");
+        const q = query(peticionRef, where("usuario", "==", userEmail));
+        const querySnapshot = await getDocs(q);
+
+        const data = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setPeticiones(data); // Guardar las peticiones en el estado
+      } catch (error) {
+        console.error("Error al obtener las peticiones:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPeticiones();
+  }, [userEmail]);
+
+  // Filtrar las peticiones según el estado
   const filteredPeticiones =
     filter === "All"
       ? peticiones
       : peticiones.filter((peticion) => peticion.estado === filter);
 
+  // Manejar la navegación
   const handleNavigation = (index) => {
     setSelectedIndex(index);
-    // Redirigir según el índice seleccionado.
     if (index === 0) {
-      window.location.href = "/"; // Redirigir a "Inicio".
+      window.location.href = "/"; // Redirigir a Inicio
     } else if (index === 1) {
-      window.location.href = "/services"; // Redirigir a "Servicios".
+      window.location.href = "/services"; // Redirigir a Servicios
     } else if (index === 3) {
-      window.location.href = "/profile"; // Redirigir a "Perfil".
+      window.location.href = "/profile"; // Redirigir a Perfil
     }
   };
 
@@ -80,7 +97,7 @@ const HistorialScreen = () => {
         Historial de Peticiones
       </h1>
 
-      {/* Resumen de usuario */}
+      {/* Resumen del usuario */}
       <div
         style={{
           display: "flex",
@@ -95,7 +112,7 @@ const HistorialScreen = () => {
       >
         <div>
           <p style={{ margin: "0", fontWeight: "bold" }}>Usuario:</p>
-          <p style={{ margin: "0", color: "#666" }}>{user?.email}</p>
+          <p style={{ margin: "0", color: "#666" }}>{userEmail || "Cargando..."}</p>
         </div>
         <div>
           <p style={{ margin: "0", fontWeight: "bold" }}>Total Peticiones:</p>
@@ -162,7 +179,7 @@ const HistorialScreen = () => {
                     >
                       {peticion.estado}
                     </td>
-                    <td style={tableCellStyle}>${peticion.precio}</td>
+                    <td style={tableCellStyle}>Bs{peticion.precio}</td>
                   </tr>
                 ))
               ) : (
@@ -189,14 +206,11 @@ const HistorialScreen = () => {
           justifyContent: "space-around",
           alignItems: "center",
           padding: "10px 0",
+          color: "#1E1E2C",
+          
         }}
       >
-        {[
-          { icon: <FaHome />, label: "Inicio" },
-          { icon: <FaTools />, label: "Servicios" },
-          { icon: <FaReceipt />, label: "Historial" },
-          { icon: <FaUser />, label: "Perfil" },
-        ].map((tab, index) => (
+        {[{ icon: <FaHome />, label: "Inicio" }, { icon: <FaTools />, label: "Servicios" }, { icon: <FaReceipt />, label: "Historial" }, { icon: <FaUser />, label: "Perfil" }].map((tab, index) => (
           <button
             key={index}
             onClick={() => handleNavigation(index)}
@@ -217,7 +231,7 @@ const HistorialScreen = () => {
   );
 };
 
-// Estilos para la tabla
+// Estilos de la tabla
 const tableHeaderStyle = {
   padding: "10px",
   borderBottom: "1px solid #ddd",
@@ -230,6 +244,7 @@ const tableCellStyle = {
   padding: "10px",
   borderBottom: "1px solid #ddd",
   textAlign: "left",
+  color: "black",
 };
 
 const tableRowStyle = {
@@ -237,7 +252,6 @@ const tableRowStyle = {
   textAlign: "left",
 };
 
-// Colores de estado
 const getEstadoColor = (estado) => {
   switch (estado) {
     case "Pendiente":

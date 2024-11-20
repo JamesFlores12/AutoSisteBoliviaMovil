@@ -1,0 +1,173 @@
+/* General */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Arial", sans-serif;
+  background-color: #1E1E2C; /* Fondo negro oscuro */
+  /
+}
+
+/* Contenedor principal */
+.app-container {
+  max-width: 100%;
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #1E1E2C; /* Fondo negro */
+}
+
+/* Barra de navegación superior */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #1E1E2C; /* Fondo negro */
+  color: #FBC02D; /* Texto amarillo */
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center; /* Centra el título horizontalmente */
+  align-items: center;
+  padding: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.nav-button {
+  position: absolute;
+  left: 10px;
+  background: none;
+  border: none;
+  
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Contenedor del contenido */
+.content-container {
+  margin-top: 70px;
+  padding: 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Botones de servicios */
+.services-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.service-button {
+  background-color: #292929; /* Fondo gris oscuro */
+  color: white; /* Texto blanco */
+  border: 2px solid #FBC02D; /* Borde amarillo */
+  border-radius: 8px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.service-button:hover {
+  background-color: #FBC02D; /* Fondo amarillo al pasar el cursor */
+  color: #1E1E2C; /* Texto negro */
+  transform: translateY(-3px);
+}
+
+/* Contenedor de ubicación */
+.location-container {
+  background-color: #292929; /* Fondo gris oscuro */
+  color: white; /* Texto blanco */
+  text-align: center;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 90%;
+}
+
+.location-container h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Contenedor de proveedores */
+.providers-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.provider-card {
+  background-color: #292929; /* Fondo gris oscuro */
+ 
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.provider-card h3 {
+  margin: 0 0 10px;
+  color: #FBC02D; /* Texto amarillo */
+}
+
+.provider-card p {
+  margin: 5px 0;
+  line-height: 1.5; /* Mejora la legibilidad */
+}
+
+/* Mensaje de error */
+.error {
+  color: red;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Indicador de carga */
+.loading {
+  font-size: 16px;
+  color: #FBC02D; /* Texto amarillo */
+  text-align: center;
+}
+
+/* Barra de navegación inferior */
+.navigation-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #1E1E2C; /* Fondo negro */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.navigation-bar button {
+  background: none;
+  border: none;
+  
+  font-size: 18px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.navigation-bar button.active {
+  color: #FBC02D; /* Color amarillo para la pestaña activa */
+}

@@ -120,6 +120,7 @@ const HomeScreen = () => {
 
   const handleNavigation = (index) => {
     setSelectedIndex(index);
+    if (index == 0 ) navigate ("/home")
     if (index === 1) navigate("/services");
     if (index === 2) navigate("/historial");
     if (index === 3) navigate("/profile");
