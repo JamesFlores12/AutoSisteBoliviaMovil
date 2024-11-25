@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Importar Auth
+
 import { db } from "../../credenciales"; // Conexión a Firebase
 import { useNavigate } from "react-router-dom";
 import "./PagoServicio.css";
@@ -13,6 +15,7 @@ const PagoServicio = () => {
     fechaExpiracion: "",
     tipo: "",
   });
+
   const [usuarioAutenticado, setUsuarioAutenticado] = useState(null); // Guardar el usuario autenticado
   const navigate = useNavigate();
 
@@ -28,6 +31,7 @@ const PagoServicio = () => {
       }
     });
   }, [navigate]);
+
 
   // Obtener la petición en progreso
   useEffect(() => {
