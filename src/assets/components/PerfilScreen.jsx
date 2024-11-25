@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth } from "firebase/auth";
+import { getAuth, updateProfile } from "firebase/auth";
 import appFirebase from "../../credenciales";
-import ImagenPerfil from "../images/user.jpg"; // Asegúrate de que la imagen esté en este directorio
-import { FaHome, FaTools, FaReceipt, FaUser } from "react-icons/fa";
+import ImagenPerfil from "../images/user.jpg";
+import { FaHome, FaTools, FaReceipt, FaUser, FaRobot } from "react-icons/fa";
 
 const auth = getAuth(appFirebase);
 
@@ -11,8 +11,33 @@ const PerfilScreen = () => {
   const navigate = useNavigate();
   const user = auth.currentUser; // Obtener el usuario autenticado
 
-  const buildListTile = (iconClass, title, hasNotification = false) => (
+  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
+  const [personalInfo, setPersonalInfo] = useState({
+    name: user?.displayName || "",
+    phone: "",
+  });
+
+  const handleInputChange = (e) => {
+    setPersonalInfo({
+      ...personalInfo,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSavePersonalInfo = async () => {
+    try {
+      await updateProfile(user, { displayName: personalInfo.name });
+      alert("Información actualizada exitosamente");
+      setIsEditingPersonalInfo(false);
+    } catch (error) {
+      console.error("Error al actualizar perfil:", error);
+      alert("Hubo un error al actualizar tu información.");
+    }
+  };
+
+  const buildListTile = (iconClass, title, onClick, hasNotification = false) => (
     <div
+      onClick={onClick}
       style={{
         display: "flex",
         alignItems: "center",
@@ -21,6 +46,7 @@ const PerfilScreen = () => {
         padding: "12px 16px",
         borderRadius: "8px",
         marginBottom: "10px",
+        cursor: "pointer",
       }}
     >
       <div style={{ display: "flex", alignItems: "center" }}>
@@ -45,17 +71,10 @@ const PerfilScreen = () => {
     </div>
   );
 
-  // Función para manejar navegación desde la barra inferior
-  const handleNavigation = (index) => {
-    if (index === 0) {
-      navigate("/"); // Redirigir a Inicio
-    } else if (index === 1) {
-      navigate("/services"); // Redirigir a Servicios
-    } else if (index === 2) {
-      navigate("/historial"); // Redirigir a Historial
-    } else if (index === 3) {
-      navigate("/profile"); // Redirigir a Perfil
-    }
+  // Función para abrir el chatbot
+  const openChatbot = () => {
+    alert("Iniciando soporte técnico...");
+    // Aquí se puede implementar la lógica para iniciar el chatbot
   };
 
   return (
@@ -68,7 +87,6 @@ const PerfilScreen = () => {
         position: "relative",
       }}
     >
-      {/* Barra de navegación superior */}
       <header
         style={{
           display: "flex",
@@ -78,7 +96,7 @@ const PerfilScreen = () => {
         }}
       >
         <button
-          onClick={() => navigate(-1)} // Volver atrás
+          onClick={() => navigate(-1)}
           style={{
             background: "none",
             border: "none",
@@ -91,7 +109,7 @@ const PerfilScreen = () => {
         </button>
         <h1 style={{ fontSize: "20px", fontWeight: "bold" }}>Perfil</h1>
         <button
-          onClick={() => navigate("/login")} // Ir al login
+          onClick={() => navigate("/login")}
           style={{
             background: "none",
             border: "none",
@@ -104,7 +122,6 @@ const PerfilScreen = () => {
         </button>
       </header>
 
-      {/* Información del perfil del usuario */}
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <img
           src={ImagenPerfil}
@@ -123,15 +140,83 @@ const PerfilScreen = () => {
         <p style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: "16px" }}>Senior Designer</p>
       </div>
 
-      {/* Opciones del perfil */}
-      <div>
-        {buildListTile("fas fa-user", "Información Personal")}
-        {buildListTile("fas fa-wallet", "Preferencias de Pago")}
-        {buildListTile("fas fa-credit-card", "Bancos y Tarjetas")}
-        {buildListTile("fas fa-bell", "Notificaciones", true)}
-        {buildListTile("fas fa-envelope", "Centro de Mensajes")}
-        {buildListTile("fas fa-map-marker-alt", "Dirección")}
-        {buildListTile("fas fa-cog", "Configuración")}
+      {isEditingPersonalInfo ? (
+        <div
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            padding: "16px",
+            borderRadius: "8px",
+            marginBottom: "20px",
+          }}
+        >
+          <input
+            type="text"
+            name="name"
+            value={personalInfo.name}
+            onChange={handleInputChange}
+            placeholder="Nombre completo"
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "10px",
+              borderRadius: "4px",
+              border: "none",
+            }}
+          />
+          <input
+            type="text"
+            name="phone"
+            value={personalInfo.phone}
+            onChange={handleInputChange}
+            placeholder="Número de celular"
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "10px",
+              borderRadius: "4px",
+              border: "none",
+            }}
+          />
+          <button
+            onClick={handleSavePersonalInfo}
+            style={{
+              width: "100%",
+              padding: "10px",
+              backgroundColor: "#4CAF50",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Guardar
+          </button>
+        </div>
+      ) : (
+        <>
+          {buildListTile("fas fa-user", "Información Personal", () =>
+            setIsEditingPersonalInfo(true)
+          )}
+          {buildListTile("fas fa-wallet", "Preferencias de Pago")}
+          {buildListTile("fas fa-bell", "Notificaciones", true)}
+          {buildListTile("fas fa-envelope", "Centro de Mensajes")}
+        </>
+      )}
+
+      {/* Chatbot */}
+      <div
+        onClick={openChatbot}
+        style={{
+          position: "fixed",
+          bottom: "70px",
+          right: "16px",
+          backgroundColor: "#4CAF50",
+          padding: "16px",
+          borderRadius: "50%",
+          cursor: "pointer",
+        }}
+      >
+        <FaRobot size={24} color="white" />
       </div>
 
       {/* Barra de navegación inferior */}
@@ -156,11 +241,11 @@ const PerfilScreen = () => {
         ].map((tab, index) => (
           <button
             key={index}
-            onClick={() => handleNavigation(index)}
+            onClick={() => navigate(tab.label.toLowerCase())}
             style={{
               background: "none",
               border: "none",
-              color: index === 3 ? "#FBC02D" : "white", // Resalta Perfil (índice 3)
+              color: index === 3 ? "#FBC02D" : "white",
               textAlign: "center",
               cursor: "pointer",
             }}
