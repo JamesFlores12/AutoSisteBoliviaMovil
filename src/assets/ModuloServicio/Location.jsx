@@ -8,7 +8,7 @@ const Location = () => {
   useEffect(() => {
     const fetchLocation = async (latitude, longitude) => {
       try {
-        const apiKey = "TU_API_KEY"; // Reemplaza con tu API Key
+        const apiKey = "AIzaSyDlyKmoYGs3Wxmr3wBLWRJ2JikspQ7sqyk"; // Reemplaza con tu API Key
         const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
         const response = await axios.get(url);
 
