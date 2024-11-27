@@ -1,35 +1,94 @@
 .map-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  #map {
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-  }
-  
-  .back-button {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    padding: 10px 15px;
-    font-size: 16px;
-    background: #ffbf00;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 10;
-  }
-  
-  .error {
-    color: red;
-    font-size: 14px;
-    text-align: center;
-  }
-  
+  position: relative;
+  width: 100%;
+  height: 100vh; /* Ocupa toda la altura de la ventana */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #1a1a1a; /* Fondo negro */
+}
+
+.map-header {
+  width: 100%;
+  background-color: #ffbf00; /* Amarillo */
+  color: white;
+  padding: 15px 20px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.map-content {
+  flex: 1;
+  width: 95%;
+  max-width: 1200px;
+  margin: 20px auto;
+  background-color: white; /* Fondo blanco */
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+#map {
+  width: 100%;
+  height: 400px;
+  border-radius: 8px;
+  border: 2px solid #1a1a1a; /* Borde negro */
+  margin-top: 20px;
+}
+
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 10px 15px;
+  font-size: 16px;
+  background: #ffbf00; /* Amarillo */
+  color: #1a1a1a; /* Texto negro */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 10;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #e6ac00; /* Amarillo más oscuro */
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.service-buttons {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.service-button {
+  background-color: #ffbf00; /* Amarillo */
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.service-button:hover {
+  background-color: #e6ac00; /* Amarillo más oscuro */
+}

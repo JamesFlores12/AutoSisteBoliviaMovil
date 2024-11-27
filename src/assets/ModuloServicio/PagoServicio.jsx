@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+
+import { getAuth, onAuthStateChanged } from "firebase/auth"; // Importar Auth
+
 import { db } from "../../credenciales"; // Conexión a Firebase
 import { useNavigate } from "react-router-dom";
 import "./PagoServicio.css";
@@ -12,11 +15,28 @@ const PagoServicio = () => {
     fechaExpiracion: "",
     tipo: "",
   });
+
+  const [usuarioAutenticado, setUsuarioAutenticado] = useState(null); // Guardar el usuario autenticado
   const navigate = useNavigate();
 
-  const usuarioAutenticado = "usuarioEjemplo@gmail.com";
-
+  // Obtener usuario autenticado
   useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUsuarioAutenticado(user.email); // Guardar el correo del usuario autenticado
+      } else {
+        // Si no está autenticado, redirigir al login
+        navigate("/login");
+      }
+    });
+  }, [navigate]);
+
+
+  // Obtener la petición en progreso
+  useEffect(() => {
+    if (!usuarioAutenticado) return;
+
     const fetchPeticionEnProceso = async () => {
       setLoading(true);
       try {

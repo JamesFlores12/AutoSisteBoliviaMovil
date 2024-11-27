@@ -1,104 +1,103 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../credenciales"; // Conexión a Firebase
-import "./GenerarPeticion.css";
+import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { db, auth } from "../../credenciales"; // Conexión a Firebase
+import { onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import "./EstadoPeticiones.css";
 
-const GenerarPeticion = () => {
-  const { state } = useLocation(); // Recibir datos del proveedor y servicio
+const EstadoPeticiones = () => {
+  const [peticionesPendientes, setPeticionesPendientes] = useState([]); // Lista de peticiones pendientes
+  const [usuarioAutenticado, setUsuarioAutenticado] = useState(null); // Usuario autenticado
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [ubicacion, setUbicacion] = useState({ lat: null, lng: null }); // Ubicación actual
 
-  const { provider, selectedService } = state;
-
-  // Obtener ubicación actual
+  // Obtener usuario autenticado
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUbicacion({ lat: latitude, lng: longitude });
-        },
-        (error) => {
-          console.error("Error al obtener la ubicación:", error);
-          alert("No se pudo obtener la ubicación actual. Verifica los permisos.");
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUsuarioAutenticado(user.email); // Establece el correo del usuario autenticado
+      } else {
+        console.log("Usuario no autenticado. Redirigiendo...");
+        navigate("/login"); // Redirigir al login si no hay usuario autenticado
+      }
+    });
+
+    return () => unsubscribeAuth(); // Limpiar la suscripción de autenticación
+  }, [navigate]);
+
+  // Cargar peticiones pendientes desde Firestore
+  useEffect(() => {
+    if (!usuarioAutenticado) return; // No cargues si no hay usuario autenticado
+
+    const peticionesRef = collection(db, "Peticion");
+    const q = query(peticionesRef, where("usuario", "==", usuarioAutenticado)); // Filtrar por usuario autenticado
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetchedPeticiones = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        // Filtrar solo peticiones pendientes
+        const pendientes = fetchedPeticiones.filter((peticion) => peticion.estado === "Pendiente");
+        setPeticionesPendientes(pendientes);
+
+        // Si no hay peticiones pendientes, redirigir a la página de pagos
+        if (pendientes.length === 0) {
+          console.log("No hay peticiones pendientes. Redirigiendo a PagoServicio.");
+          navigate(`/pagoServicio`);
         }
-      );
-    } else {
-      alert("La geolocalización no está soportada por este navegador.");
-    }
-  }, []);
+      },
+      (error) => {
+        console.error("Error al obtener las peticiones:", error);
+      }
+    );
 
-  // Guardar la petición en Firestore
-  const handleSubmit = async () => {
-    if (!ubicacion.lat || !ubicacion.lng) {
-      alert("No se pudo obtener la ubicación. Intenta nuevamente.");
-      return;
-    }
+    return () => unsubscribe(); // Limpiar la suscripción
+  }, [usuarioAutenticado, navigate]);
 
-    setLoading(true);
+  // Cancelar una petición
+  const cancelarPeticion = async (id) => {
     try {
-      const peticion = {
-        proveedor: provider.nombreProveedor,
-        servicio: selectedService,
-        estado: "Pendiente",
-        precio: 90,
-        ubicacion: {
-          latitud: ubicacion.lat, // Almacenar como número
-          longitud: ubicacion.lng, // Almacenar como número
-        },
-        usuario: "usuarioEjemplo@gmail.com", // Simula un usuario autenticado
-        fecha: new Date().toISOString().split("T")[0], // Fecha actual
-      };
-
-      await addDoc(collection(db, "Peticion"), peticion);
-      alert("¡Petición generada exitosamente!");
-      navigate("/estado-peticiones"); // Redirigir a la página de estado de peticiones
-    } catch (err) {
-      console.error("Error al generar la petición:", err);
-      alert("Hubo un error al generar la petición.");
-    } finally {
-      setLoading(false);
+      const peticionRef = doc(db, "Peticion", id); // Referencia a la petición en Firestore
+      await updateDoc(peticionRef, { estado: "Cancelada" }); // Cambiar el estado a "Cancelada"
+      alert("Petición cancelada exitosamente.");
+    } catch (error) {
+      console.error("Error al cancelar la petición:", error);
+      alert("Hubo un problema al cancelar la petición.");
     }
   };
 
   return (
-    <div className="peticion-container">
-      <header className="peticion-header">
-        <button
-          className="back-button"
-          onClick={() => navigate(-1)}
-        >
-          ←
-        </button>
-        <h1>Generar Petición</h1>
-      </header>
-      <div className="peticion-card">
-        <h2>{provider.nombreEmpresa}</h2>
-        <p>
-          <strong>Servicio:</strong> {selectedService}
-        </p>
-        <p>
-          <strong>Precio:</strong> Bs90
-        </p>
-        {ubicacion.lat && ubicacion.lng ? (
-          <p>
-            <strong>Ubicación detectada:</strong> {ubicacion.lat.toFixed(6)}, {ubicacion.lng.toFixed(6)}
-          </p>
-        ) : (
-          <p>Obteniendo ubicación...</p>
-        )}
-        <button
-          className="confirm-button"
-          onClick={handleSubmit}
-          disabled={loading || !ubicacion.lat}
-        >
-          {loading ? "Generando..." : "Confirmar Petición"}
-        </button>
-      </div>
+    <div className="estado-container">
+      <h1>Mis Peticiones</h1>
+      {peticionesPendientes.length > 0 ? (
+        peticionesPendientes.map((peticion) => (
+          <div key={peticion.id} className="estado-card">
+            <h3>{peticion.servicio}</h3>
+            <p>
+              <strong>Estado:</strong> {peticion.estado}
+            </p>
+            <p>
+              <strong>Proveedor:</strong> {peticion.proveedor}
+            </p>
+            <p>
+              <strong>Precio:</strong> Bs{peticion.precio}
+            </p>
+            <button
+              className="cancel-button"
+              onClick={() => cancelarPeticion(peticion.id)} // Manejar cancelación
+            >
+              Cancelar
+            </button>
+          </div>
+        ))
+      ) : (
+        <p>No tienes peticiones pendientes.</p>
+      )}
     </div>
   );
 };
 
-export default GenerarPeticion;
+export default EstadoPeticiones;

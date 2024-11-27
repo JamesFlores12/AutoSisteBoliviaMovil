@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore"; // Firestore
+import { onAuthStateChanged } from "firebase/auth"; // Para manejar autenticación
 import { useNavigate } from "react-router-dom"; // Para la navegación
-import { db } from "../../credenciales"; // Conexión a Firebase
+import { db, auth } from "../../credenciales"; // Conexión a Firebase
+import {
+  FaHome,
+  FaTools,
+  FaReceipt,
+  FaUser,
+} from "react-icons/fa"; // Iconos de la barra de navegación
 import "./ModuloServicio.css";
 import Location from "./Location"; // Componente Location
 
@@ -10,7 +17,23 @@ const ModuloServicio = () => {
   const [providers, setProviders] = useState([]); // Lista de proveedores
   const [loading, setLoading] = useState(false); // Estado de carga
   const [error, setError] = useState(null); // Manejo de errores
+  const [userEmail, setUserEmail] = useState(null); // Correo del usuario autenticado
+  const [selectedIndex, setSelectedIndex] = useState(1); // Seleccionar Servicios como activo
   const navigate = useNavigate(); // Hook para navegación
+
+  // Obtener el correo del usuario autenticado
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email); // Establecer el correo del usuario autenticado
+      } else {
+        console.log("Usuario no autenticado. Redirigiendo...");
+        navigate("/login"); // Redirigir al login si no hay usuario autenticado
+      }
+    });
+
+    return () => unsubscribeAuth(); // Limpiar la suscripción
+  }, [navigate]);
 
   // Manejar el clic en los botones de servicio
   const handleServiceClick = async (serviceType) => {
@@ -38,12 +61,22 @@ const ModuloServicio = () => {
 
   // Manejar clic en una tarjeta de proveedor
   const handleProviderClick = (provider) => {
-    navigate("/generar-peticion", { state: { provider, selectedService } });
+    // Pasar los datos del proveedor, servicio seleccionado y correo del usuario
+    navigate("/generar-peticion", { state: { provider, selectedService, userEmail } });
+  };
+
+  // Manejar la navegación entre secciones
+  const handleNavigation = (index) => {
+    setSelectedIndex(index);
+    if (index === 0) navigate("/home");
+    if (index === 1) navigate("/services");
+    if (index === 2) navigate("/historial");
+    if (index === 3) navigate("/profile");
   };
 
   return (
     <div className="app-container">
-      {/* Barra de navegación */}
+      {/* Barra de navegación superior */}
       <header className="app-header">
         {selectedService && (
           <button
@@ -63,6 +96,9 @@ const ModuloServicio = () => {
       <div className="content-container">
         {!selectedService ? (
           <>
+            {/* Mostrar el correo del usuario autenticado */}
+            {userEmail && <p className="user-email">Usuario conectado: {userEmail}</p>}
+
             {/* Ubicación actual */}
             <div className="location-container">
               <h2>Tu ubicación actual:</h2>
@@ -100,7 +136,7 @@ const ModuloServicio = () => {
         ) : (
           <div className="providers-container">
             {loading ? (
-              <p>Cargando proveedores...</p>
+              <p className="loading">Cargando proveedores...</p>
             ) : error ? (
               <p className="error">{error}</p>
             ) : providers.length > 0 ? (
@@ -130,6 +166,25 @@ const ModuloServicio = () => {
             )}
           </div>
         )}
+      </div>
+
+      {/* Barra de navegación inferior */}
+      <div className="navigation-bar">
+        {[
+          { icon: <FaHome />, label: "Inicio" },
+          { icon: <FaTools />, label: "Servicios" },
+          { icon: <FaReceipt />, label: "Historial" },
+          { icon: <FaUser />, label: "Perfil" },
+        ].map((tab, index) => (
+          <button
+            key={index}
+            onClick={() => handleNavigation(index)}
+            className={selectedIndex === index ? "active" : ""}
+          >
+            {tab.icon}
+            <p>{tab.label}</p>
+          </button>
+        ))}
       </div>
     </div>
   );

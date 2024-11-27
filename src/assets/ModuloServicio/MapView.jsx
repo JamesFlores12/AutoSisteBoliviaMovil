@@ -1,35 +1,58 @@
 import React, { useEffect, useState } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore"; // Firebase Firestore
-import { db } from "../../credenciales"; // Conexión a Firebase
+import { onAuthStateChanged } from "firebase/auth"; // Para manejar la autenticación
+import { db, auth } from "../../credenciales"; // Conexión a Firebase
 import "./MapView.css";
 
 const MapView = ({ serviceType, goBack }) => {
   const [providers, setProviders] = useState([]);
+  const [userEmail, setUserEmail] = useState(null); // Estado para almacenar el correo del usuario autenticado
   const [error, setError] = useState(null);
+
+  // Obtenemos el correo del usuario autenticado
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email); // Guardar el correo del usuario autenticado
+      } else {
+        console.log("Usuario no autenticado.");
+        setError("Usuario no autenticado. Por favor, inicia sesión.");
+      }
+    });
+
+    return () => unsubscribeAuth(); // Limpiar la suscripción
+  }, []);
 
   // Cargar los proveedores desde Firebase
   useEffect(() => {
+    if (!userEmail) return; // No ejecutamos la consulta si no tenemos un usuario autenticado
+
     const fetchProviders = async () => {
       try {
         const providersRef = collection(db, "proveedores");
         const q = query(providersRef, where("tipoServicio", "==", serviceType));
         const querySnapshot = await getDocs(q);
 
-        const providersData = querySnapshot.docs.map((doc) => doc.data());
-        setProviders(providersData);
+        if (querySnapshot.empty) {
+          setError("No se encontraron proveedores para este servicio.");
+        } else {
+          const providersData = querySnapshot.docs.map((doc) => doc.data());
+          setProviders(providersData);
+        }
       } catch (err) {
-        setError("Error al cargar los proveedores.");
+        console.error("Error al cargar los proveedores:", err);
+        setError("Hubo un problema al cargar los proveedores.");
       }
     };
 
     fetchProviders();
-  }, [serviceType]);
+  }, [serviceType, userEmail]);
 
   // Renderizar el mapa cuando los proveedores estén disponibles
   useEffect(() => {
     if (providers.length > 0) {
       const map = new window.google.maps.Map(document.getElementById("map"), {
-        center: { lat: -16.5, lng: -68.15 }, // Latitud y longitud inicial (puedes cambiarlo según tu región)
+        center: { lat: -16.5, lng: -68.15 }, // Latitud y longitud inicial
         zoom: 12,
       });
 

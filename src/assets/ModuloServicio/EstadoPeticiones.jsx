@@ -1,18 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { db } from "../../credenciales";
+import { onAuthStateChanged } from "firebase/auth"; // Para obtener el usuario autenticado
+import { db, auth } from "../../credenciales"; // Incluye `auth` de Firebase Authentication
 import { useNavigate } from "react-router-dom";
 import "./EstadoPeticiones.css"; // Agrega estilos si los necesitas
 
 const EstadoPeticiones = () => {
-  const [peticionesPendientes, setPeticionesPendientes] = useState([]); // Lista de peticiones pendientes
+  const [peticionesPendientes, setPeticionesPendientes] = useState([]);
+  const [usuarioAutenticado, setUsuarioAutenticado] = useState(null); // Estado para el usuario autenticado
   const navigate = useNavigate();
 
-  const usuarioAutenticado = "usuarioEjemplo@gmail.com"; // Usuario autenticado
+  useEffect(() => {
+    // Verificar el estado de autenticación del usuario
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUsuarioAutenticado(user.email); // Establece el correo del usuario autenticado
+      } else {
+        console.log("Usuario no autenticado. Redirigiendo...");
+        navigate("/login"); // Redirige al login si no hay un usuario autenticado
+      }
+    });
+
+    return () => unsubscribeAuth(); // Limpiar la suscripción de autenticación
+  }, [navigate]);
 
   useEffect(() => {
+    if (!usuarioAutenticado) return; // Espera hasta que el correo esté disponible
+
     const peticionesRef = collection(db, "Peticion");
-    const q = query(peticionesRef, where("usuario", "==", usuarioAutenticado)); // Filtrar por usuario autenticado
+    const q = query(peticionesRef, where("usuario", "==", usuarioAutenticado));
 
     const unsubscribe = onSnapshot(
       q,
@@ -31,7 +47,9 @@ const EstadoPeticiones = () => {
 
         // Si no hay peticiones pendientes, redirigir a la página de pagos
         if (pendientes.length === 0) {
-          console.log("No hay peticiones pendientes. Redirigiendo a PagoServicio.");
+          console.log(
+            "No hay peticiones pendientes. Redirigiendo a PagoServicio."
+          );
           navigate(`/pagoServicio`);
         }
       },
@@ -41,7 +59,7 @@ const EstadoPeticiones = () => {
     );
 
     return () => unsubscribe(); // Limpiar la suscripción
-  }, [navigate, usuarioAutenticado]);
+  }, [usuarioAutenticado, navigate]);
 
   return (
     <div className="estado-container">
