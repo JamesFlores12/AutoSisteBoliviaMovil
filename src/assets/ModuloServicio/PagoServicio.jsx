@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
-
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Importar Auth
-
-import { db } from "../../credenciales"; // Conexión a Firebase
+import { collection, query, where, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { db, auth } from "../../credenciales"; // Conexión a Firebase
 import { useNavigate } from "react-router-dom";
 import "./PagoServicio.css";
 
@@ -15,58 +13,86 @@ const PagoServicio = () => {
     fechaExpiracion: "",
     tipo: "",
   });
+  const [userEmail, setUserEmail] = useState(null); // Estado para almacenar el correo del usuario autenticado
+  const [userExists, setUserExists] = useState(false); // Verifica si el usuario pertenece a la colección Usuario
 
-  const [usuarioAutenticado, setUsuarioAutenticado] = useState(null); // Guardar el usuario autenticado
   const navigate = useNavigate();
 
-  // Obtener usuario autenticado
+  // Verificar el usuario autenticado y que esté en la colección Usuario
   useEffect(() => {
-    const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUsuarioAutenticado(user.email); // Guardar el correo del usuario autenticado
+        const email = user.email;
+        setUserEmail(email);
+
+        // Verificar si el correo pertenece a la colección Usuario
+        try {
+          const usuarioSnapshot = await verificarUsuarioEnColeccion(email);
+          if (usuarioSnapshot) {
+            setUserExists(true); // Usuario existe en la colección Usuario
+          } else {
+            alert("El usuario no está registrado en la colección Usuario.");
+            navigate("/login");
+          }
+        } catch (error) {
+          console.error("Error al verificar el usuario:", error);
+          navigate("/login");
+        }
       } else {
-        // Si no está autenticado, redirigir al login
+        alert("Usuario no autenticado. Por favor, inicia sesión.");
         navigate("/login");
       }
     });
+
+    return () => unsubscribeAuth();
   }, [navigate]);
 
+  const verificarUsuarioEnColeccion = async (email) => {
+    try {
+      const usuariosRef = collection(db, "Usuario");
+      const q = query(usuariosRef, where("email", "==", email)); // Buscar por email
+      const querySnapshot = await getDocs(q);
+      return !querySnapshot.empty; // Retorna true si existe un documento
+    } catch (error) {
+      console.error("Error al verificar en la colección Usuario:", error);
+      return false;
+    }
+  };
 
-  // Obtener la petición en progreso
+  // Obtener la petición en progreso para el usuario autenticado
   useEffect(() => {
-    if (!usuarioAutenticado) return;
+    if (userExists) {
+      const fetchPeticionEnProceso = async () => {
+        setLoading(true);
+        try {
+          const peticionesRef = collection(db, "Peticion");
+          const q = query(
+            peticionesRef,
+            where("usuario", "==", userEmail), // Verificar peticiones para el correo del usuario autenticado
+            where("estado", "==", "En Progreso")
+          );
 
-    const fetchPeticionEnProceso = async () => {
-      setLoading(true);
-      try {
-        const peticionesRef = collection(db, "Peticion");
-        const q = query(
-          peticionesRef,
-          where("usuario", "==", usuarioAutenticado),
-          where("estado", "==", "En progreso")
-        );
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const peticion = querySnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))[0];
 
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          const peticion = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))[0];
-
-          setPeticionEnProceso(peticion);
-        } else {
-          setPeticionEnProceso(null);
+            setPeticionEnProceso(peticion);
+          } else {
+            setPeticionEnProceso(null);
+          }
+        } catch (error) {
+          console.error("Error al obtener la petición en progreso:", error);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error("Error al obtener la petición en progreso:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
-    fetchPeticionEnProceso();
-  }, [usuarioAutenticado]);
+      fetchPeticionEnProceso();
+    }
+  }, [userEmail, userExists]);
 
   const handleConfirmarPago = async () => {
     if (!peticionEnProceso) return;
@@ -77,7 +103,7 @@ const PagoServicio = () => {
         idSolicitud: peticionEnProceso.id,
         monto: peticionEnProceso.precio,
         proveedor: peticionEnProceso.proveedor,
-        usuario: usuarioAutenticado,
+        usuario: userEmail, // Usar el correo del usuario autenticado
       };
 
       const metodoPagoData = {
@@ -86,11 +112,26 @@ const PagoServicio = () => {
         Tipo_Tarjeta: tarjeta.tipo,
       };
 
+      // Guardar en las colecciones "Pago" y "Metodo_Pago"
       await addDoc(collection(db, "Pago"), pagoData);
       await addDoc(collection(db, "Metodo_Pago"), metodoPagoData);
 
+      // Cambiar el estado de la petición a "Pagado"
+      const peticionRef = doc(db, "Peticion", peticionEnProceso.id);
+      await updateDoc(peticionRef, { estado: "Pagado" });
+
       alert("¡Pago confirmado con éxito!");
-      navigate("/");
+
+      // Redirigir al componente del mapa después del pago
+      navigate("/ruta-mapa", {
+        state: {
+          userLocation: {
+            lat: peticionEnProceso.ubicacion.latitud,
+            lng: peticionEnProceso.ubicacion.longitud,
+          },
+          providerLocation: peticionEnProceso.proveedorUbicacion, // Asegúrate de tener este campo en Firestore
+        },
+      });
     } catch (error) {
       console.error("Error al confirmar el pago:", error);
       alert("Hubo un error al realizar el pago.");

@@ -1,0 +1,58 @@
+/* Contenedor principal */
+.map-container {
+    background-color: #ffffff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Encabezado estilo móvil */
+  .map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f9a825;
+    color: white;
+    padding: 10px 15px;
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Título del mapa */
+  .map-title {
+    font-size: 16px;
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+  }
+  
+  /* Botón de regreso */
+  .back-button {
+    background-color: white;
+    color: #f9a825;
+    border: none;
+    border-radius: 50%;
+    padding: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .back-button:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Contenedor del mapa */
+  .map-wrapper {
+    flex-grow: 1;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  
+  /* Mensaje de error */
+  .map-error {
+    color: red;
+    font-size: 16px;
+    text-align: center;
+    margin-top: 20px;
+  }

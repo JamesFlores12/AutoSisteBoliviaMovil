@@ -1,0 +1,135 @@
+/* Estilo General */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1E1E2F; /* Fondo oscuro */
+    color: #FFFFFF; /* Texto claro */
+  }
+  
+  /* Contenedor Principal */
+  .pago-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #2E2E40;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Encabezado */
+  .pago-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .pago-header h1 {
+    color: #FFD700; /* Dorado */
+    font-size: 28px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  
+  /* Detalle del Servicio */
+  .pago-card {
+    padding: 20px;
+    background-color: #1E1E2F;
+    border-radius: 10px;
+    border: 1px solid #FFD700;
+  }
+  
+  .pago-card h2 {
+    font-size: 22px;
+    color: #FFD700;
+    margin-bottom: 10px;
+  }
+  
+  .pago-card p {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #FFFFFF;
+  }
+  
+  /* Formulario */
+  .payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .payment-form input,
+  .payment-form select {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #FFFFFF;
+    color: #1E1E2F;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  .payment-form input:focus,
+  .payment-form select:focus {
+    border-color: #FFD700;
+  }
+  
+  .payment-form select {
+    cursor: pointer;
+  }
+  
+  /* Botón Confirmar Pago */
+  .confirm-payment-button {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #1E1E2F;
+    background-color: #FFD700;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .confirm-payment-button:hover {
+    background-color: #FFC000;
+  }
+  
+  .confirm-payment-button.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  /* Indicador de Carga */
+  .loading-container {
+    text-align: center;
+    padding: 50px;
+    color: #FFD700;
+    font-size: 18px;
+  }
+  
+  .error-container {
+    text-align: center;
+    padding: 50px;
+    color: #FF6347;
+    font-size: 18px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .pago-container {
+      padding: 15px;
+    }
+  
+    .payment-form input,
+    .payment-form select {
+      font-size: 14px;
+    }
+  
+    .confirm-payment-button {
+      font-size: 16px;
+      padding: 12px;
+    }
+  }

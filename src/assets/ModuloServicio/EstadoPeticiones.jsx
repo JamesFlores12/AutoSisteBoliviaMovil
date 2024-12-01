@@ -8,13 +8,35 @@ import "./EstadoPeticiones.css"; // Agrega estilos si los necesitas
 const EstadoPeticiones = () => {
   const [peticionesPendientes, setPeticionesPendientes] = useState([]);
   const [usuarioAutenticado, setUsuarioAutenticado] = useState(null); // Estado para el usuario autenticado
+  const [esUsuarioValido, setEsUsuarioValido] = useState(false); // Verifica si el usuario está registrado en la colección `Usuario`
   const navigate = useNavigate();
 
+  // Verificar si el usuario está autenticado y pertenece a la colección `Usuario`
   useEffect(() => {
-    // Verificar el estado de autenticación del usuario
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUsuarioAutenticado(user.email); // Establece el correo del usuario autenticado
+        const email = user.email;
+
+        try {
+          // Verificar en la colección `Usuario` si el correo existe
+          const userRef = collection(db, "Usuario");
+          const q = query(userRef, where("email", "==", email));
+          const snapshot = await getDocs(q);
+
+          if (!snapshot.empty) {
+            setUsuarioAutenticado(email); // Establece el correo del usuario autenticado
+            setEsUsuarioValido(true); // Usuario válido
+          } else {
+            console.error("El usuario no está registrado en la colección Usuario.");
+            alert("El usuario no está registrado en la colección Usuario.");
+            setEsUsuarioValido(false);
+            navigate("/login"); // Redirige al login si no está registrado
+          }
+        } catch (error) {
+          console.error("Error al verificar en la colección Usuario:", error);
+          alert("Hubo un error al verificar el usuario. Intenta nuevamente.");
+          navigate("/login");
+        }
       } else {
         console.log("Usuario no autenticado. Redirigiendo...");
         navigate("/login"); // Redirige al login si no hay un usuario autenticado
@@ -24,8 +46,9 @@ const EstadoPeticiones = () => {
     return () => unsubscribeAuth(); // Limpiar la suscripción de autenticación
   }, [navigate]);
 
+  // Obtener las peticiones del usuario autenticado
   useEffect(() => {
-    if (!usuarioAutenticado) return; // Espera hasta que el correo esté disponible
+    if (!usuarioAutenticado || !esUsuarioValido) return; // Espera hasta que el correo esté disponible y sea válido
 
     const peticionesRef = collection(db, "Peticion");
     const q = query(peticionesRef, where("usuario", "==", usuarioAutenticado));
@@ -59,7 +82,11 @@ const EstadoPeticiones = () => {
     );
 
     return () => unsubscribe(); // Limpiar la suscripción
-  }, [usuarioAutenticado, navigate]);
+  }, [usuarioAutenticado, esUsuarioValido, navigate]);
+
+  if (!esUsuarioValido) {
+    return <p>Verificando usuario...</p>;
+  }
 
   return (
     <div className="estado-container">

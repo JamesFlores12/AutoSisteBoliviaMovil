@@ -33,6 +33,11 @@ const RegisterScreen = () => {
         email: email.trim(),
         contraseña: password.trim(),
         nombre: name.trim(),
+        apellido: "", // Campo inicial vacío
+        celular: "", // Campo inicial vacío
+        estado: "activo", // Estado inicial
+        img: "", // Campo inicial vacío para imagen
+        id: userCredential.user.uid, // Guardamos el UID del usuario
       });
 
       // Redirigir al inicio de sesión
@@ -71,7 +76,6 @@ const RegisterScreen = () => {
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
         }}
       >
-        {/* Logo */}
         <img
           src={Imagen}
           alt="Logo"
@@ -83,7 +87,6 @@ const RegisterScreen = () => {
             objectFit: "cover",
           }}
         />
-        {/* Título */}
         <h1
           style={{
             color: "#04294F",
@@ -96,7 +99,6 @@ const RegisterScreen = () => {
         </h1>
 
         <form onSubmit={handleRegister}>
-          {/* Campo de Nombre */}
           <div style={{ marginBottom: "15px", textAlign: "left" }}>
             <label
               style={{
@@ -124,7 +126,6 @@ const RegisterScreen = () => {
             />
           </div>
 
-          {/* Campo de Email */}
           <div style={{ marginBottom: "15px", textAlign: "left" }}>
             <label
               style={{
@@ -152,7 +153,6 @@ const RegisterScreen = () => {
             />
           </div>
 
-          {/* Campo de Contraseña */}
           <div style={{ marginBottom: "15px", textAlign: "left", position: "relative" }}>
             <label
               style={{
@@ -197,7 +197,6 @@ const RegisterScreen = () => {
             </button>
           </div>
 
-          {/* Mostrar errores */}
           {errorMessage && (
             <p
               style={{
@@ -211,7 +210,6 @@ const RegisterScreen = () => {
             </p>
           )}
 
-          {/* Botón de registro */}
           <button
             type="submit"
             style={{
@@ -229,8 +227,6 @@ const RegisterScreen = () => {
             Regístrate
           </button>
         </form>
-
-        {/* Enlace para volver al login */}
         <p style={{ color: "#555", fontSize: "14px", marginTop: "20px" }}>
           ¿Ya tienes cuenta?{" "}
           <button

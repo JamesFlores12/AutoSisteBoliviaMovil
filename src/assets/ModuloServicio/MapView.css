@@ -1,94 +1,164 @@
-.map-container {
-  position: relative;
-  width: 100%;
-  height: 100vh; /* Ocupa toda la altura de la ventana */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: #1a1a1a; /* Fondo negro */
+/* Estilo General */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #1E1E2F; /* Fondo oscuro */
+  color: white; /* Texto claro */
+  line-height: 1.6;
 }
 
-.map-header {
-  width: 100%;
-  background-color: #ffbf00; /* Amarillo */
+/* Contenedor Principal */
+.contenedor-mapview {
+  font-family: Arial, sans-serif;
+  background-color: #1E1E2F;
+  color: white;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Encabezado */
+.header-mapview {
+  display: flex;
+  align-items: center;
+  background-color: #3B3B5F;
   color: white;
   padding: 15px 20px;
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-.map-content {
-  flex: 1;
-  width: 95%;
-  max-width: 1200px;
-  margin: 20px auto;
-  background-color: white; /* Fondo blanco */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
+}
+
+.header-button {
+  background-color: white;
+  color: #3B3B5F;
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-right: 10px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.header-button:hover {
+  background-color: #FFD700;
+  color: #1E1E2F;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Información del Proveedor */
+.provider-details {
+  margin-top: 20px;
   padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: hidden;
+  border-radius: 10px;
+  background-color: #2E2E40;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-#map {
-  width: 100%;
-  height: 400px;
-  border-radius: 8px;
-  border: 2px solid #1a1a1a; /* Borde negro */
-  margin-top: 20px;
+.provider-details h2 {
+  color: #FFD700; /* Dorado para títulos */
+  margin-bottom: 15px;
+  text-transform: uppercase;
 }
 
-.back-button {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  padding: 10px 15px;
-  font-size: 16px;
-  background: #ffbf00; /* Amarillo */
-  color: #1a1a1a; /* Texto negro */
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  z-index: 10;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
+.provider-details p {
+  margin: 10px 0;
+  line-height: 1.5;
+  color: #FFFFFF; /* Texto claro */
 }
 
-.back-button:hover {
-  background-color: #e6ac00; /* Amarillo más oscuro */
-}
-
-.error {
-  color: red;
-  font-size: 14px;
+/* Encabezado de Servicios */
+.services-header {
   text-align: center;
-  margin-top: 10px;
+  margin: 30px 0;
 }
 
-.service-buttons {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
+.services-header h2 {
+  font-size: 24px;
+  color: #FFD700; /* Título en dorado */
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  letter-spacing: 1px; /* Espaciado entre letras */
+}
+
+/* Contenedor de Servicios */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Tarjetas adaptables */
+  gap: 20px;
   justify-content: center;
-  gap: 10px;
+  padding: 0 10px;
 }
 
-.service-button {
-  background-color: #ffbf00; /* Amarillo */
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 10px 20px;
+/* Tarjetas de Servicio */
+.service-card {
+  background-color: #2E2E40; /* Fondo más claro */
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  color: #FFFFFF;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+}
+
+.service-card h3 {
+  color: #FFD700; /* Títulos dorados */
+  font-size: 18px;
+  margin-bottom: 10px;
+  text-transform: capitalize;
+}
+
+.service-card p {
+  color: #CCCCCC; /* Texto gris claro */
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+/* Botón Aceptar */
+.accept-button {
+  background-color: #FFD700; /* Fondo dorado */
+  color: #1E1E2F; /* Texto oscuro */
   border: none;
   border-radius: 5px;
+  padding: 10px 15px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.service-button:hover {
-  background-color: #e6ac00; /* Amarillo más oscuro */
+.accept-button:hover {
+  background-color: #FFC000;
+  transform: translateY(-2px); /* Efecto de elevarse */
 }
+/* Botón Aceptar */
+.accept-button {
+  background-color: #FFD700; /* Fondo dorado */
+  color: #1E1E2F; /* Texto oscuro */
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.accept-button:hover {
+  background-color: #FFC000;
+  transform: translateY(-2px); /* Efecto de elevación */
+}
+
+/* Responsividad */

@@ -9,12 +9,8 @@ import {
   FaReceipt,
   FaUser,
   FaSearch,
-  FaTruck,
-  FaCarSide,
-  FaBolt,
-  FaWrench,
 } from "react-icons/fa";
-
+import Modal from "react-modal"; // Importación de Modal
 
 const auth = getAuth(appFirebase);
 const db = getFirestore(appFirebase);
@@ -112,7 +108,9 @@ const HomeScreen = () => {
     return (
       <>
         {Array.from({ length: 5 }, (_, index) => (
-          <span key={index} style={{ color: index < rating ? "#FFD700" : "#E0E0E0" }}>⭐</span>
+          <span key={index} style={{ color: index < rating ? "#FFD700" : "#E0E0E0" }}>
+            ⭐
+          </span>
         ))}
       </>
     );
@@ -120,7 +118,7 @@ const HomeScreen = () => {
 
   const handleNavigation = (index) => {
     setSelectedIndex(index);
-    if (index == 0 ) navigate ("/home")
+    if (index === 0) navigate("/home");
     if (index === 1) navigate("/services");
     if (index === 2) navigate("/historial");
     if (index === 3) navigate("/profile");

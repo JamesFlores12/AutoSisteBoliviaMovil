@@ -1,96 +1,72 @@
-/* Contenedor principal */
-.peticion-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* Ajustado para alinear elementos correctamente */
-  height: 100vh;
-  background: linear-gradient(135deg, #003f7f, #007bff); /* Fondo degradado */
-  color: #ffffff;
-  padding-top: 80px; /* Espacio para que no colisione con el header */
-}
-
-/* Cabecera */
-.peticion-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background: linear-gradient(135deg, #ffbf00, #ffa500); /* Degradado amarillo */
-  padding: 15px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center; /* Centrar el título */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-}
-
-.peticion-header h1 {
-  margin: 0;
-  font-size: 22px; /* Ajustar tamaño del texto */
-  font-weight: bold;
-  color: white; /* Garantizar que sea legible */
-  text-align: center;
-}
-
-/* Botón de retroceso */
-.back-button {
-  position: absolute; /* Colocar el botón en su posición */
-  left: 15px;
-  background: none;
-  border: none;
+/* Contenedor general */
+.contenedor-peticiones {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #1e1e2f;
   color: white;
-  font-size: 18px;
-  cursor: pointer;
+  min-height: 100vh;
 }
 
-/* Tarjeta */
-.peticion-card {
-  background: white;
-  color: #333;
-  border-radius: 10px;
-  padding: 25px 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+/* Título principal */
+.contenedor-peticiones h1 {
   text-align: center;
-  max-width: 400px;
-  width: 90%;
-  margin-top: 20px;
+  color: #ffd700;
+  margin-bottom: 20px;
 }
 
-.peticion-card h2 {
-  font-size: 20px;
-  color: #0056b3;
+/* Lista de peticiones */
+.lista-peticiones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Tarjetas de petición */
+.tarjeta-peticion {
+  background-color: #2e2e40;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.tarjeta-peticion h3 {
+  color: #ffd700;
   margin-bottom: 10px;
 }
 
-.peticion-card p {
-  margin: 10px 0;
-  font-size: 16px;
+.tarjeta-peticion p {
+  margin: 5px 0;
 }
 
-.peticion-card p strong {
-  color: #0056b3;
-}
-
-/* Botón de confirmación */
-.confirm-button {
-  background: #28a745;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+/* Botones */
+.botones-peticion {
   margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
 }
 
-.confirm-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+.btn-progreso {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.confirm-button:disabled {
-  background: gray;
-  cursor: not-allowed;
+.btn-progreso:hover {
+  background-color: #45a049;
+}
+
+.btn-cancelar {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-cancelar:hover {
+  background-color: #e53935;
 }
